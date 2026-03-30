@@ -16,17 +16,50 @@ function App() {
   const setActiveTab = useStore(s => s.setActiveTab);
   const showCaptureFlow = useStore(s => s.showCaptureFlow);
   const openCapture = useStore(s => s.openCapture);
+  const deleteItems = useStore(s => s.deleteItems);
 
   const [selectedItem, setSelectedItem] = useState<ItemRecord | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  // Derive from items directly so the component re-renders when items change
   const dayItems = items.filter(item => item.date === selectedDate);
   const dailyTotal = dayItems.reduce((sum, item) => sum + item.happinessValue, 0);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    if (confirm(`Delete ${count} item${count > 1 ? 's' : ''}?`)) {
+      deleteItems(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      setSelectMode(false);
+    }
+  };
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleDeleteSingle = (item: ItemRecord) => {
+    if (confirm(`Delete "${item.itemName}"?`)) {
+      deleteItems([item.id]);
+      setSelectedItem(null);
+    }
+  };
 
   return (
     <div className="app">
@@ -58,21 +91,88 @@ function App() {
                 <span className="day-total">{dailyTotal} <small>pts</small></span>
               </div>
 
+              {/* Select / Delete toolbar */}
+              {dayItems.length > 0 && (
+                <div className="select-toolbar">
+                  {selectMode ? (
+                    <>
+                      <button className="toolbar-btn cancel" onClick={exitSelectMode}>
+                        Cancel
+                      </button>
+                      <span className="toolbar-count">
+                        {selectedIds.size} selected
+                      </span>
+                      <button
+                        className="toolbar-btn select-all"
+                        onClick={() => {
+                          if (selectedIds.size === dayItems.length) {
+                            setSelectedIds(new Set());
+                          } else {
+                            setSelectedIds(new Set(dayItems.map(i => i.id)));
+                          }
+                        }}
+                      >
+                        {selectedIds.size === dayItems.length ? 'Deselect all' : 'Select all'}
+                      </button>
+                      <button
+                        className="toolbar-btn delete"
+                        onClick={handleDeleteSelected}
+                        disabled={selectedIds.size === 0}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <button className="toolbar-btn select" onClick={() => setSelectMode(true)}>
+                      Select
+                    </button>
+                  )}
+                </div>
+              )}
+
               {dayItems.length === 0 ? (
                 <div className="empty-state">
-                  <span className="empty-icon">🎮</span>
+                  <span className="empty-icon">&#127918;</span>
                   <p>No loot logged for this day</p>
                   <p className="empty-sub">Tap + to capture your first item!</p>
                 </div>
               ) : (
                 <div className="items-list">
                   {dayItems.map(item => (
-                    <LootCard
-                      key={item.id}
-                      item={item}
-                      compact
-                      onClick={() => setSelectedItem(item)}
-                    />
+                    <div key={item.id} className={`card-wrapper ${selectMode ? 'select-mode' : ''} ${selectedIds.has(item.id) ? 'selected' : ''}`}>
+                      {selectMode && (
+                        <div
+                          className="select-checkbox"
+                          onClick={() => toggleSelect(item.id)}
+                        >
+                          {selectedIds.has(item.id) ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#534AB7">
+                              <rect x="2" y="2" width="20" height="20" rx="4" fill="#534AB7"/>
+                              <path d="M7 12l3 3 7-7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                            </svg>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <rect x="2" y="2" width="20" height="20" rx="4" stroke="#888" strokeWidth="2" fill="none"/>
+                            </svg>
+                          )}
+                        </div>
+                      )}
+                      <LootCard
+                        item={item}
+                        compact
+                        onClick={() => {
+                          if (selectMode) {
+                            toggleSelect(item.id);
+                          } else {
+                            setSelectedItem(item);
+                          }
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -84,11 +184,13 @@ function App() {
       </div>
 
       {/* FAB */}
-      <button className="fab" onClick={openCapture} aria-label="Add new item">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-        </svg>
-      </button>
+      {!selectMode && (
+        <button className="fab" onClick={openCapture} aria-label="Add new item">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+      )}
 
       {/* Capture Flow */}
       {showCaptureFlow && <CaptureFlow />}
@@ -97,32 +199,18 @@ function App() {
       {selectedItem && (
         <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedItem(null)}>✕</button>
+            <button className="modal-close" onClick={() => setSelectedItem(null)}>&#10005;</button>
             <LootCard item={selectedItem} onImageClick={setLightboxSrc} />
-            <div className="modal-images">
-              <div className="modal-image-pair">
-                <div>
-                  <p className="image-label">Original</p>
-                  <img
-                    src={selectedItem.originalImageUrl}
-                    alt="Original"
-                    className="modal-img clickable"
-                    onClick={() => setLightboxSrc(selectedItem.originalImageUrl)}
-                  />
-                </div>
-                {selectedItem.styledImageUrl && (
-                  <div>
-                    <p className="image-label">Stylized</p>
-                    <img
-                      src={selectedItem.styledImageUrl}
-                      alt="Stylized"
-                      className="modal-img styled clickable"
-                      onClick={() => setLightboxSrc(selectedItem.styledImageUrl!)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            <button
+              className="btn-delete-item"
+              onClick={() => handleDeleteSingle(selectedItem)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Delete item
+            </button>
           </div>
         </div>
       )}

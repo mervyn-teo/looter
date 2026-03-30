@@ -33,6 +33,7 @@ interface AppState {
   generateLootCard: () => Promise<void>;
   retryImage: () => Promise<void>;
   saveItem: () => Promise<void>;
+  deleteItems: (ids: string[]) => void;
 
   // Computed
   getItemsForDate: (date: string) => ItemRecord[];
@@ -186,6 +187,14 @@ export const useStore = create<AppState>((set, get) => ({
       console.error('Failed to save item:', error);
       alert('Failed to save item. Storage may be full.');
     }
+  },
+
+  deleteItems: (ids) => {
+    let updatedItems = get().items;
+    for (const id of ids) {
+      updatedItems = storage.deleteItem(id);
+    }
+    set({ items: updatedItems });
   },
 
   getItemsForDate: (date) => {
