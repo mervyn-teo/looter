@@ -16,8 +16,7 @@ export function CaptureFlow() {
   const saveItem = useStore(s => s.saveItem);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [cameraActive, setCameraActive] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [identifying, setIdentifying] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -66,47 +65,19 @@ export function CaptureFlow() {
     reader.readAsDataURL(file);
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setCameraActive(true);
-      }
-    } catch (err) {
-      console.error('Camera access denied:', err);
-      alert('Camera access denied. Please use the gallery option instead.');
-    }
-  };
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const captureFromCamera = () => {
-    if (!videoRef.current) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.drawImage(videoRef.current, 0, 0);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-    // Stop camera stream
-    const stream = videoRef.current.srcObject as MediaStream;
-    stream?.getTracks().forEach(t => t.stop());
-    setCameraActive(false);
-
-    setPhoto(dataUrl);
-    setIdentifying(true);
-    startIdentification().then(() => setIdentifying(false));
-  };
-
-  const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream?.getTracks().forEach(t => t.stop());
-    }
-    setCameraActive(false);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      setPhoto(dataUrl);
+      setIdentifying(true);
+      await startIdentification();
+      setIdentifying(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   // ── Screen 1: Capture ──
@@ -115,7 +86,7 @@ export function CaptureFlow() {
       <div className="capture-overlay">
         <div className="capture-screen">
           <div className="capture-header">
-            <button className="back-btn" onClick={() => { stopCamera(); closeCapture(); }}>
+            <button className="back-btn" onClick={closeCapture}>
               Cancel
             </button>
             <h2>New item</h2>
@@ -127,13 +98,6 @@ export function CaptureFlow() {
               <div className="spinner" />
               <p>Identifying item...</p>
             </div>
-          ) : cameraActive ? (
-            <div className="camera-view">
-              <video ref={videoRef} autoPlay playsInline className="camera-video" />
-              <button className="capture-btn" onClick={captureFromCamera}>
-                <div className="capture-btn-inner" />
-              </button>
-            </div>
           ) : (
             <div className="capture-options">
               <div className="camera-placeholder">
@@ -141,7 +105,7 @@ export function CaptureFlow() {
                 <p>Take a photo of your purchase</p>
               </div>
               <div className="capture-buttons">
-                <button className="btn btn-primary" onClick={startCamera}>
+                <button className="btn btn-primary" onClick={() => cameraInputRef.current?.click()}>
                   Take photo
                 </button>
                 <button
@@ -154,6 +118,16 @@ export function CaptureFlow() {
             </div>
           )}
 
+          {/* Native camera input — opens the actual camera app on mobile */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={handleCameraCapture}
+          />
+          {/* Gallery input — opens the photo picker */}
           <input
             ref={fileInputRef}
             type="file"
