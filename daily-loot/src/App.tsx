@@ -10,11 +10,10 @@ import './App.css';
 
 function App() {
   const initialize = useStore(s => s.initialize);
+  const items = useStore(s => s.items);
   const selectedDate = useStore(s => s.selectedDate);
   const activeTab = useStore(s => s.activeTab);
   const setActiveTab = useStore(s => s.setActiveTab);
-  const getItemsForDate = useStore(s => s.getItemsForDate);
-  const getDailyTotal = useStore(s => s.getDailyTotal);
   const showCaptureFlow = useStore(s => s.showCaptureFlow);
   const openCapture = useStore(s => s.openCapture);
 
@@ -25,8 +24,9 @@ function App() {
     initialize();
   }, [initialize]);
 
-  const dayItems = getItemsForDate(selectedDate);
-  const dailyTotal = getDailyTotal(selectedDate);
+  // Derive from items directly so the component re-renders when items change
+  const dayItems = items.filter(item => item.date === selectedDate);
+  const dailyTotal = dayItems.reduce((sum, item) => sum + item.happinessValue, 0);
 
   return (
     <div className="app">
