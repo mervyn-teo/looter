@@ -1,0 +1,165 @@
+/* ── Compact Card (list view) ── */
+.loot-card.compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 12px;
+  border-left: 4px solid;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.loot-card.compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loot-card-image-compact {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f5f3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loot-card-image-compact img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loot-placeholder {
+  font-size: 24px;
+}
+
+.loot-placeholder.large {
+  font-size: 64px;
+}
+
+.loot-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.loot-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loot-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rarity-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rarity-badge.overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.loot-card-price {
+  font-size: 13px;
+  color: #888;
+}
+
+.loot-card-score {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Full Card (detail/loot drop view) ── */
+.loot-card.full {
+  text-align: center;
+}
+
+.loot-card-image-full {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 20px;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.styled-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) saturate(1.2);
+}
+
+.loot-card-details {
+  padding: 0 16px;
+}
+
+.loot-card-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 16px;
+}
+
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.score-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.score-row.total {
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.score-value.total {
+  font-size: 20px;
+  font-weight: 800;
+}

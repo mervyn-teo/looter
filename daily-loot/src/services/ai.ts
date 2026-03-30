@@ -1,0 +1,130 @@
+// ── AI Service Layer ──
+// Real implementation using OpenRouter API.
+// - google/gemini-3-flash-preview: item identification & price estimation
+// - google/gemini-3.1-flash-image-preview: stylized loot image generation
+
+import type { AIIdentificationResult } from '../types';
+import { CATEGORIES } from '../types';
+import { chatCompletion, imageGeneration } from './openrouter';
+
+// ── Models ──
+const IDENTIFICATION_MODEL = 'google/gemini-3-flash-preview';
+const IMAGE_GENERATION_MODEL = 'google/gemini-3.1-flash-image-preview';
+
+/**
+ * Identify item from a photo using Gemini 3 Flash via OpenRouter.
+ * Sends the image to the vision model with a structured prompt requesting
+ * item name, category, and estimated price as JSON.
+ */
+export async function identifyItem(imageDataUrl: string): Promise<AIIdentificationResult> {
+  const categories = CATEGORIES.join(', ');
+
+  try {
+    const responseText = await chatCompletion(
+      IDENTIFICATION_MODEL,
+      [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: imageDataUrl },
+            },
+            {
+              type: 'text',
+              text: `Identify the product in this image. Return ONLY a valid JSON object (no markdown, no code fences) with these exact fields:
+- "item_name": string — the specific product name (e.g. "Iced Matcha Latte", "AirPods Pro", "Banana Bunch")
+- "category": string — one of these normalized categories: ${categories}
+- "estimated_price": number — estimated USD retail price as a number (e.g. 6.50, not "$6.50")
+
+Example response:
+{"item_name": "Iced Matcha Latte", "category": "coffee", "estimated_price": 6.50}`,
+            },
+          ],
+        },
+      ],
+      { temperature: 0.2, maxTokens: 256 }
+    );
+
+    // Parse the JSON response, handling potential markdown code fences
+    const cleaned = responseText
+      .replace(/```json\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return {
+      itemName: parsed.item_name || 'Unknown Item',
+      category: (parsed.category || 'other').toLowerCase(),
+      estimatedPrice: typeof parsed.estimated_price === 'number'
+        ? parsed.estimated_price
+        : parseFloat(parsed.estimated_price) || 0,
+    };
+  } catch (error) {
+    console.error('Item identification failed:', error);
+    // Return a fallback so the user can still manually enter details
+    return {
+      itemName: 'Unknown Item',
+      category: 'other',
+      estimatedPrice: 0,
+    };
+  }
+}
+
+/**
+ * Generate a stylized "loot drop" image using Gemini 3.1 Flash Image via OpenRouter.
+ *
+ * Sends the original photo + the Nano Banana prompt to the image generation model.
+ * Returns a base64 data URL of the stylized image.
+ */
+export async function generateStylizedImage(
+  originalImageDataUrl: string,
+  itemName: string,
+  rarityGlowColor: string
+): Promise<string> {
+  const prompt = buildNanaBananaPrompt(itemName, rarityGlowColor);
+
+  try {
+    const result = await imageGeneration(
+      IMAGE_GENERATION_MODEL,
+      [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: originalImageDataUrl },
+            },
+            {
+              type: 'text',
+              text: prompt,
+            },
+          ],
+        },
+      ]
+    );
+
+    console.log('[Daily Loot] Image gen result — imageBase64:', result.imageBase64 ? `${result.imageBase64.slice(0, 80)}... (${result.imageBase64.length} chars)` : 'null');
+    console.log('[Daily Loot] Image gen result — text:', result.text ? result.text.slice(0, 200) : 'empty');
+
+    if (result.imageBase64) {
+      return result.imageBase64;
+    }
+
+    console.warn('[Daily Loot] Image generation did not return an image. Full text response:', result.text?.slice(0, 500));
+    return originalImageDataUrl;
+  } catch (error) {
+    console.error('Stylized image generation failed:', error);
+    // Fallback to original image so the flow isn't broken
+    return originalImageDataUrl;
+  }
+}
+
+/**
+ * Build the Nano Banana prompt for a given item.
+ * Used for image generation and also exported for display/debugging.
+ */
+export function buildNanaBananaPrompt(itemName: string, rarityGlowColor: string): string {
+  return `Remove all background elements, hands, tables, and supporting surfaces. Isolate the ${itemName}. Add a non-aggressive smooth cinematic bokeh background. Apply ${rarityGlowColor} rim lighting. Return only the edited image.`;
+}

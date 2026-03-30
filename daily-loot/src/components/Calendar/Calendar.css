@@ -1,0 +1,138 @@
+.calendar {
+  padding: 16px;
+  background: #fff;
+  border-radius: 16px;
+  margin: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.calendar-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.calendar-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.month-nav-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.month-nav-btn:hover {
+  color: #534AB7;
+}
+
+.calendar-month {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  padding: 8px 0;
+}
+
+.calendar-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+  min-height: 44px;
+  transition: all 0.15s ease;
+}
+
+.calendar-day:hover {
+  background: #f5f3ff;
+}
+
+.calendar-day.other-month {
+  opacity: 0.3;
+}
+
+.calendar-day.today .day-number {
+  color: #534AB7;
+  font-weight: 700;
+}
+
+.calendar-day.selected {
+  background: #534AB7;
+}
+
+.calendar-day.selected .day-number {
+  color: #fff;
+  font-weight: 700;
+}
+
+.calendar-day.selected .day-score {
+  color: #d4c8ff;
+}
+
+.day-number {
+  font-size: 14px;
+  color: #333;
+  line-height: 1;
+}
+
+.day-indicator {
+  position: absolute;
+  bottom: 3px;
+}
+
+.day-score {
+  font-size: 9px;
+  font-weight: 600;
+  color: #534AB7;
+}
+
+.calendar-day.has-items:not(.selected) {
+  background: #f9f8ff;
+}
+
+.calendar-day.has-items::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #534AB7;
+}
+
+.calendar-day.selected.has-items::after {
+  background: #d4c8ff;
+}
