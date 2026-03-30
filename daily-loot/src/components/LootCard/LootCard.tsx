@@ -9,86 +9,149 @@ interface LootCardProps {
   onImageClick?: (src: string) => void;
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  coffee: '\u2615',
+  food: '\uD83C\uDF54',
+  snacks: '\uD83C\uDF6A',
+  drinks: '\uD83E\uDDC3',
+  electronics: '\u26A1',
+  clothing: '\uD83D\uDC55',
+  accessories: '\uD83D\uDC8D',
+  books: '\uD83D\uDCDA',
+  health: '\uD83D\uDC8A',
+  beauty: '\u2728',
+  home: '\uD83C\uDFE0',
+  entertainment: '\uD83C\uDFAC',
+  transportation: '\uD83D\uDE97',
+  groceries: '\uD83D\uDED2',
+  sports: '\u26BD',
+  toys: '\uD83E\uDDF8',
+  office: '\uD83D\uDCCE',
+  other: '\uD83D\uDCE6',
+};
+
 export function LootCard({ item, compact = false, onClick, onImageClick }: LootCardProps) {
   const rarity = getRarityFromPrice(item.price);
+  const categoryIcon = CATEGORY_ICONS[item.category] || '\uD83D\uDCE6';
 
   if (compact) {
     return (
       <div
-        className="loot-card compact"
-        style={{ borderLeftColor: rarity.glowColor }}
+        className={`tcg-card compact rarity-${item.rarityTier.toLowerCase()}`}
+        style={{ '--rarity-color': rarity.glowColor } as React.CSSProperties}
         onClick={onClick}
       >
-        <div className="loot-card-image-compact">
-          {item.styledImageUrl ? (
-            <img src={item.styledImageUrl} alt={item.itemName} />
-          ) : (
-            <div className="loot-placeholder">🎁</div>
-          )}
-        </div>
-        <div className="loot-card-info">
-          <h3 className="loot-card-name">{item.itemName}</h3>
-          <div className="loot-card-meta">
-            <span
-              className="rarity-badge"
-              style={{ backgroundColor: rarity.glowColor }}
-            >
-              {item.rarityTier}
-            </span>
-            <span className="loot-card-price">${item.price.toFixed(2)}</span>
+        {/* Card border frame */}
+        <div className="tcg-card-frame">
+          {/* Top bar: name + category */}
+          <div className="tcg-card-header">
+            <span className="tcg-card-name">{item.itemName}</span>
+            <span className="tcg-card-category-icon">{categoryIcon}</span>
           </div>
-        </div>
-        <div className="loot-card-score" style={{ color: rarity.glowColor }}>
-          {item.happinessValue} pts
+
+          {/* Image window */}
+          <div className="tcg-card-image-frame">
+            {item.styledImageUrl ? (
+              <img src={item.styledImageUrl} alt={item.itemName} />
+            ) : item.originalImageUrl ? (
+              <img src={item.originalImageUrl} alt={item.itemName} />
+            ) : (
+              <div className="tcg-placeholder">{categoryIcon}</div>
+            )}
+          </div>
+
+          {/* Type bar */}
+          <div className="tcg-card-type-bar">
+            <span className="tcg-rarity-badge">{item.rarityTier}</span>
+            <span className="tcg-card-category">{item.category}</span>
+          </div>
+
+          {/* Description */}
+          <div className="tcg-card-description">
+            <p>{item.description || 'A mysterious item of unknown origin.'}</p>
+          </div>
+
+          {/* Stats footer */}
+          <div className="tcg-card-stats">
+            <span className="tcg-stat">
+              <span className="tcg-stat-label">HP</span>
+              <span className="tcg-stat-value">{item.happinessValue}</span>
+            </span>
+            <span className="tcg-stat">
+              <span className="tcg-stat-label">ATK</span>
+              <span className="tcg-stat-value">{item.costScore}</span>
+            </span>
+            <span className="tcg-stat">
+              <span className="tcg-stat-label">DEF</span>
+              <span className="tcg-stat-value">{item.uniquenessScore}</span>
+            </span>
+            <span className="tcg-price">${item.price.toFixed(2)}</span>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ── Full card (detail / loot drop view) ──
   return (
-    <div className="loot-card full" onClick={onClick}>
-      <div
-        className={`loot-card-image-full${onImageClick ? ' clickable' : ''}`}
-        style={{
-          boxShadow: `0 0 30px ${rarity.glowColor}40`,
-          borderColor: rarity.glowColor,
-        }}
-        onClick={(e) => {
-          if (onImageClick && item.styledImageUrl) {
-            e.stopPropagation();
-            onImageClick(item.styledImageUrl);
-          }
-        }}
-      >
-        {item.styledImageUrl ? (
-          <img src={item.styledImageUrl} alt={item.itemName} className="styled-image" />
-        ) : (
-          <div className="loot-placeholder large">🎁</div>
-        )}
-        <span
-          className="rarity-badge overlay"
-          style={{ backgroundColor: rarity.glowColor }}
-        >
-          {item.rarityTier}
-        </span>
-      </div>
+    <div
+      className={`tcg-card full rarity-${item.rarityTier.toLowerCase()}`}
+      style={{ '--rarity-color': rarity.glowColor } as React.CSSProperties}
+      onClick={onClick}
+    >
+      <div className="tcg-card-frame">
+        {/* Header */}
+        <div className="tcg-card-header">
+          <span className="tcg-card-name">{item.itemName}</span>
+          <span className="tcg-card-category-icon">{categoryIcon}</span>
+        </div>
 
-      <div className="loot-card-details">
-        <h2 className="loot-card-title">{item.itemName}</h2>
-        <div className="score-breakdown">
-          <div className="score-row">
-            <span>Cost score</span>
-            <span className="score-value">{item.costScore} / 50</span>
+        {/* Image */}
+        <div
+          className={`tcg-card-image-frame${onImageClick ? ' clickable' : ''}`}
+          onClick={(e) => {
+            if (onImageClick && (item.styledImageUrl || item.originalImageUrl)) {
+              e.stopPropagation();
+              onImageClick(item.styledImageUrl || item.originalImageUrl);
+            }
+          }}
+        >
+          {item.styledImageUrl ? (
+            <img src={item.styledImageUrl} alt={item.itemName} className="styled-image" />
+          ) : item.originalImageUrl ? (
+            <img src={item.originalImageUrl} alt={item.itemName} />
+          ) : (
+            <div className="tcg-placeholder large">{categoryIcon}</div>
+          )}
+        </div>
+
+        {/* Type bar */}
+        <div className="tcg-card-type-bar">
+          <span className="tcg-rarity-badge">{item.rarityTier}</span>
+          <span className="tcg-card-category">{item.category}</span>
+        </div>
+
+        {/* Description */}
+        <div className="tcg-card-description">
+          <p>{item.description || 'A mysterious item of unknown origin.'}</p>
+        </div>
+
+        {/* Score breakdown */}
+        <div className="tcg-card-stats-full">
+          <div className="tcg-stat-row">
+            <span className="tcg-stat-icon">&#9876;</span>
+            <span>Cost Score</span>
+            <span className="tcg-stat-value">{item.costScore}/50</span>
           </div>
-          <div className="score-row">
-            <span>Uniqueness score</span>
-            <span className="score-value">{item.uniquenessScore} / 50</span>
+          <div className="tcg-stat-row">
+            <span className="tcg-stat-icon">&#9733;</span>
+            <span>Uniqueness</span>
+            <span className="tcg-stat-value">{item.uniquenessScore}/50</span>
           </div>
-          <div className="score-row total">
-            <span>Total happiness</span>
-            <span className="score-value total" style={{ color: rarity.glowColor }}>
-              {item.happinessValue} pts
-            </span>
+          <div className="tcg-stat-row total">
+            <span className="tcg-stat-icon">&#10084;</span>
+            <span>Happiness</span>
+            <span className="tcg-stat-value total">{item.happinessValue} pts</span>
           </div>
         </div>
       </div>

@@ -34,11 +34,12 @@ export async function identifyItem(imageDataUrl: string): Promise<AIIdentificati
               type: 'text',
               text: `Identify the product in this image. Return ONLY a valid JSON object (no markdown, no code fences) with these exact fields:
 - "item_name": string — the specific product name (e.g. "Iced Matcha Latte", "AirPods Pro", "Banana Bunch")
+- "description": string — a short, fun TCG-style flavor text (1 sentence, max 15 words, like a trading card game item description, witty and playful)
 - "category": string — one of these normalized categories: ${categories}
 - "estimated_price": number — estimated USD retail price as a number (e.g. 6.50, not "$6.50")
 
 Example response:
-{"item_name": "Iced Matcha Latte", "category": "coffee", "estimated_price": 6.50}`,
+{"item_name": "Iced Matcha Latte", "description": "A mystical green elixir that grants +5 focus and morning clarity.", "category": "coffee", "estimated_price": 6.50}`,
             },
           ],
         },
@@ -56,6 +57,7 @@ Example response:
 
     return {
       itemName: parsed.item_name || 'Unknown Item',
+      description: parsed.description || 'A mysterious item of unknown origin.',
       category: (parsed.category || 'other').toLowerCase(),
       estimatedPrice: typeof parsed.estimated_price === 'number'
         ? parsed.estimated_price
@@ -63,9 +65,9 @@ Example response:
     };
   } catch (error) {
     console.error('Item identification failed:', error);
-    // Return a fallback so the user can still manually enter details
     return {
       itemName: 'Unknown Item',
+      description: 'A mysterious item of unknown origin.',
       category: 'other',
       estimatedPrice: 0,
     };
@@ -126,5 +128,5 @@ export async function generateStylizedImage(
  * Used for image generation and also exported for display/debugging.
  */
 export function buildNanaBananaPrompt(itemName: string, rarityGlowColor: string): string {
-  return `Remove all background elements, hands, tables, and supporting surfaces. Isolate the ${itemName}. Add a non-aggressive smooth cinematic bokeh background. Apply ${rarityGlowColor} rim lighting. Return only the edited image.`;
+  return `Remove all background elements, hands, tables, and supporting surfaces. Isolate the ${itemName}, make sure it is centered and well-lit. Add a non-aggressive smooth cinematic bokeh background. Apply ${rarityGlowColor} rim lighting. Return only the edited image.`;
 }

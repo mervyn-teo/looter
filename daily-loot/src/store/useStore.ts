@@ -29,7 +29,7 @@ interface AppState {
   closeCapture: () => void;
   setPhoto: (dataUrl: string) => void;
   startIdentification: () => Promise<void>;
-  updateConfirmation: (field: 'name' | 'category' | 'price', value: string | number) => void;
+  updateConfirmation: (field: 'name' | 'description' | 'category' | 'price', value: string | number) => void;
   generateLootCard: () => Promise<void>;
   retryImage: () => Promise<void>;
   saveItem: () => Promise<void>;
@@ -48,6 +48,7 @@ const initialCaptureState: CaptureState = {
   photoDataUrl: null,
   aiResult: null,
   confirmedName: '',
+  confirmedDescription: '',
   confirmedCategory: '',
   confirmedPrice: 0,
   styledImageUrl: null,
@@ -95,6 +96,7 @@ export const useStore = create<AppState>((set, get) => ({
           step: 'confirm',
           aiResult: result,
           confirmedName: result.itemName,
+          confirmedDescription: result.description,
           confirmedCategory: result.category,
           confirmedPrice: result.estimatedPrice,
         },
@@ -108,6 +110,7 @@ export const useStore = create<AppState>((set, get) => ({
     capture: {
       ...state.capture,
       ...(field === 'name' && { confirmedName: value as string }),
+      ...(field === 'description' && { confirmedDescription: value as string }),
       ...(field === 'category' && { confirmedCategory: value as string }),
       ...(field === 'price' && { confirmedPrice: value as number }),
     },
@@ -137,6 +140,7 @@ export const useStore = create<AppState>((set, get) => ({
         userId: 'default-user',
         date: format(new Date(), 'yyyy-MM-dd'),
         itemName: capture.confirmedName,
+        description: capture.confirmedDescription || 'A mysterious item of unknown origin.',
         category: capture.confirmedCategory,
         price: capture.confirmedPrice,
         rarityTier: scores.rarityTier,

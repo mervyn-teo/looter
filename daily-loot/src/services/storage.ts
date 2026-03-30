@@ -60,9 +60,10 @@ export function loadItems(): ItemRecord[] {
     const raw = localStorage.getItem(ITEMS_KEY);
     if (!raw) return [];
     const items: ItemRecord[] = JSON.parse(raw);
-    // Rehydrate image URLs from separate storage
+    // Rehydrate image URLs from separate storage + add defaults for missing fields
     return items.map(item => ({
       ...item,
+      description: item.description || 'A mysterious item of unknown origin.',
       originalImageUrl: item.originalImageUrl.startsWith(IMAGES_KEY_PREFIX)
         ? loadImage(item.originalImageUrl)
         : item.originalImageUrl,

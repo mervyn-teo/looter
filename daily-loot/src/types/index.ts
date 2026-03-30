@@ -33,6 +33,7 @@ export interface ItemRecord {
   userId: string;
   date: string; // YYYY-MM-DD
   itemName: string;
+  description: string; // Short TCG-style flavor text
   category: string;
   price: number;
   rarityTier: RarityTier;
@@ -46,6 +47,7 @@ export interface ItemRecord {
 
 export interface AIIdentificationResult {
   itemName: string;
+  description: string;
   category: string;
   estimatedPrice: number;
 }
@@ -61,6 +63,7 @@ export interface CaptureState {
   photoDataUrl: string | null;
   aiResult: AIIdentificationResult | null;
   confirmedName: string;
+  confirmedDescription: string;
   confirmedCategory: string;
   confirmedPrice: number;
   styledImageUrl: string | null;
