@@ -102,18 +102,23 @@ body {
 
 .items-list > .card-wrapper {
   display: flex;
+  min-width: 0;
+  width: 100%;
 }
 
 .items-list > .card-wrapper > .tcg-card {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
 }
 
 .items-list > .card-wrapper > .tcg-card > .tcg-card-frame {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .items-list > .card-wrapper > .tcg-card > .tcg-card-frame > .tcg-card-description {
@@ -309,6 +314,8 @@ body {
 /* ── Card Wrapper (for select mode) ── */
 .card-wrapper {
   position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .card-wrapper.select-mode {

@@ -14,6 +14,8 @@
   border-radius: 14px;
   overflow: hidden;
   position: relative;
+  box-sizing: border-box;
+  max-width: 100%;
   box-shadow:
     0 0 8px color-mix(in srgb, var(--rarity-color) 30%, transparent),
     0 4px 16px rgba(0, 0, 0, 0.4);
@@ -234,7 +236,8 @@
 
 .tcg-card.compact .tcg-card-stats {
   padding: 4px 8px;
-  gap: 6px;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .tcg-card.compact .tcg-stat-label {
