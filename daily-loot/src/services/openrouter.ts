@@ -80,13 +80,29 @@ export async function chatCompletion(
 
 /**
  * Send a request to an image-generation model via OpenRouter.
- * Handles all known response formats from Gemini image models.
+ * Supports both Gemini-style (dual text+image) and image-only models (Seedream, Flux).
+ * Uses the `modalities` parameter to request image output.
  */
 export async function imageGeneration(
   model: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  options: {
+    modalities?: string[];
+    imageSize?: string;
+  } = {}
 ): Promise<{ text: string; imageBase64: string | null }> {
   const apiKey = getApiKey();
+
+  const body: Record<string, unknown> = {
+    model,
+    messages,
+    modalities: options.modalities ?? ['image'],
+    stream: false,
+  };
+
+  if (options.imageSize) {
+    body.image_config = { image_size: options.imageSize };
+  }
 
   const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
     method: 'POST',
@@ -96,12 +112,7 @@ export async function imageGeneration(
       'HTTP-Referer': window.location.origin,
       'X-Title': 'Daily Loot',
     },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.7,
-      max_tokens: 4096,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

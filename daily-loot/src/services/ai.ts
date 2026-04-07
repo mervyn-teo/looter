@@ -9,7 +9,7 @@ import { chatCompletion, imageGeneration } from './openrouter';
 
 // ── Models ──
 const IDENTIFICATION_MODEL = 'google/gemini-3-flash-preview';
-const IMAGE_GENERATION_MODEL = 'google/gemini-3.1-flash-image-preview';
+const IMAGE_GENERATION_MODEL = 'bytedance-seed/seedream-4.5';
 
 /**
  * Identify item from a photo using Gemini 3 Flash via OpenRouter.
@@ -104,7 +104,8 @@ export async function generateStylizedImage(
             },
           ],
         },
-      ]
+      ],
+      { modalities: ['image'], imageSize: '1K' }
     );
 
     console.log('[Daily Loot] Image gen result — imageBase64:', result.imageBase64 ? `${result.imageBase64.slice(0, 80)}... (${result.imageBase64.length} chars)` : 'null');
