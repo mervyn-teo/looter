@@ -47,6 +47,28 @@
   font-weight: 500;
 }
 
+.today-btn {
+  align-self: center;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #534AB7;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.today-btn:hover {
+  background: #4239a0;
+}
+
+.today-btn:active {
+  transform: scale(0.96);
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

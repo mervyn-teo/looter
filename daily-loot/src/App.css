@@ -96,7 +96,28 @@ body {
 .items-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
   gap: 10px;
+}
+
+.items-list > .card-wrapper {
+  display: flex;
+}
+
+.items-list > .card-wrapper > .tcg-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.items-list > .card-wrapper > .tcg-card > .tcg-card-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.items-list > .card-wrapper > .tcg-card > .tcg-card-frame > .tcg-card-description {
+  flex: 1;
 }
 
 /* ── Empty State ── */

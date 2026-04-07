@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 import { useStore } from './store/useStore';
 import { Calendar } from './components/Calendar/Calendar';
 import { LootCard } from './components/LootCard/LootCard';
@@ -27,6 +28,8 @@ function App() {
     initialize();
   }, [initialize]);
 
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const isToday = selectedDate === today;
   const dayItems = items.filter(item => item.date === selectedDate);
   const dailyTotal = dayItems.reduce((sum, item) => sum + item.happinessValue, 0);
 
@@ -87,7 +90,7 @@ function App() {
           {activeTab === 'items' ? (
             <div className="items-view">
               <div className="day-header">
-                <span className="day-label">Today's haul</span>
+                <span className="day-label">{isToday ? "Today's haul" : selectedDate}</span>
                 <span className="day-total">{dailyTotal} <small>pts</small></span>
               </div>
 
@@ -138,7 +141,7 @@ function App() {
                 <div className="empty-state">
                   <span className="empty-icon">&#127918;</span>
                   <p>No loot logged for this day</p>
-                  <p className="empty-sub">Tap + to capture your first item!</p>
+                  {isToday && <p className="empty-sub">Tap + to capture your first item!</p>}
                 </div>
               ) : (
                 <div className="items-list">
@@ -183,8 +186,8 @@ function App() {
         </div>
       </div>
 
-      {/* FAB */}
-      {!selectMode && (
+      {/* FAB — only shown on today's date */}
+      {!selectMode && isToday && (
         <button className="fab" onClick={openCapture} aria-label="Add new item">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>

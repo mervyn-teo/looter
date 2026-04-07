@@ -38,17 +38,29 @@ export function Calendar() {
     setSelectedDate(format(newDate, 'yyyy-MM-dd'));
   };
 
+  const today = new Date();
+  const isViewingToday = isSameDay(currentMonth, today) || selectedDate === format(today, 'yyyy-MM-dd');
+
+  const jumpToToday = () => {
+    setSelectedDate(format(today, 'yyyy-MM-dd'));
+  };
+
   return (
     <div className="calendar">
       <div className="calendar-header">
         <div>
           <h1 className="calendar-title">Daily Loot</h1>
           <div className="calendar-month-nav">
-            <button className="month-nav-btn" onClick={() => navigateMonth('prev')}>‹</button>
+            <button className="month-nav-btn" onClick={() => navigateMonth('prev')}>&#8249;</button>
             <span className="calendar-month">{format(currentMonth, 'MMMM yyyy')}</span>
-            <button className="month-nav-btn" onClick={() => navigateMonth('next')}>›</button>
+            <button className="month-nav-btn" onClick={() => navigateMonth('next')}>&#8250;</button>
           </div>
         </div>
+        {!isViewingToday && (
+          <button className="today-btn" onClick={jumpToToday}>
+            Today
+          </button>
+        )}
       </div>
 
       <div className="calendar-grid">
