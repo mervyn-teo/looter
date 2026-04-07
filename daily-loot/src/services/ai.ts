@@ -75,7 +75,50 @@ Example response:
 }
 
 /**
- * Generate a stylized "loot drop" image using Gemini 3.1 Flash Image via OpenRouter.
+ * Generate a TCG-style flavor text description for an item.
+ * Called at loot-card generation time so it uses the user's confirmed/edited name & category.
+ */
+export async function generateDescription(
+  itemName: string,
+  category: string,
+  price: number
+): Promise<string> {
+  try {
+    const responseText = await chatCompletion(
+      IDENTIFICATION_MODEL,
+      [
+        {
+          role: 'user',
+          content: `Write a short, fun TCG-style flavor text for this item. Return ONLY the flavor text string, nothing else — no quotes, no JSON, no markdown.
+
+Item: ${itemName}
+Category: ${category}
+Price: $${price.toFixed(2)}
+
+Rules:
+- Max 15 words
+- Witty, playful, like a trading card game item description
+- Reference the item's nature or use
+
+Examples:
+- "A mystical green elixir that grants +5 focus and morning clarity."
+- "Legendary noise-canceling shields forged in the fires of Silicon Valley."
+- "Common provisions that restore 2 HP per bunch consumed."`,
+        },
+      ],
+      { temperature: 0.8, maxTokens: 60 }
+    );
+
+    const cleaned = responseText.replace(/^["']|["']$/g, '').trim();
+    return cleaned || 'A mysterious item of unknown origin.';
+  } catch (error) {
+    console.error('Description generation failed:', error);
+    return 'A mysterious item of unknown origin.';
+  }
+}
+
+/**
+ * Generate a stylized "loot drop" image using Seedream 4.5 via OpenRouter.
  *
  * Sends the original photo + the Nano Banana prompt to the image generation model.
  * Returns a base64 data URL of the stylized image.

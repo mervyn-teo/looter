@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
 import type { ItemRecord, CaptureState, DailyStats } from '../types';
 import { calculateHappinessValue, countCategoryOccurrences } from '../services/scoring';
-import { identifyItem, generateStylizedImage } from '../services/ai';
+import { identifyItem, generateStylizedImage, generateDescription } from '../services/ai';
 import * as storage from '../services/storage';
 import { getRarityFromPrice } from '../services/scoring';
 
@@ -123,11 +123,21 @@ export const useStore = create<AppState>((set, get) => ({
 
     try {
       const rarity = getRarityFromPrice(capture.confirmedPrice);
-      const styledImageUrl = await generateStylizedImage(
-        capture.photoDataUrl!,
-        capture.confirmedName,
-        rarity.glowColor
-      );
+
+      // Run image generation and description generation in parallel.
+      // Description is always regenerated using the user's confirmed/edited values.
+      const [styledImageUrl, description] = await Promise.all([
+        generateStylizedImage(
+          capture.photoDataUrl!,
+          capture.confirmedName,
+          rarity.glowColor
+        ),
+        generateDescription(
+          capture.confirmedName,
+          capture.confirmedCategory,
+          capture.confirmedPrice
+        ),
+      ]);
 
       const prevOccurrences = countCategoryOccurrences(capture.confirmedCategory, items);
       const scores = calculateHappinessValue(
@@ -141,7 +151,7 @@ export const useStore = create<AppState>((set, get) => ({
         userId: 'default-user',
         date: format(new Date(), 'yyyy-MM-dd'),
         itemName: capture.confirmedName,
-        description: capture.confirmedDescription || 'A mysterious item of unknown origin.',
+        description,
         category: capture.confirmedCategory,
         price: capture.confirmedPrice,
         rarityTier: scores.rarityTier,
