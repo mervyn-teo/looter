@@ -16,17 +16,13 @@
   position: relative;
   box-sizing: border-box;
   max-width: 100%;
-  box-shadow:
-    0 0 8px color-mix(in srgb, var(--rarity-color) 30%, transparent),
-    0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rarity-color) 30%, transparent);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .tcg-card.compact .tcg-card-frame:hover {
   transform: translateY(-2px) scale(1.01);
-  box-shadow:
-    0 0 16px color-mix(in srgb, var(--rarity-color) 50%, transparent),
-    0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rarity-color) 45%, transparent);
 }
 
 /* ── Rarity shimmer overlay ── */
@@ -262,9 +258,7 @@
 
 .tcg-card.full .tcg-card-frame {
   border-width: 4px;
-  box-shadow:
-    0 0 20px color-mix(in srgb, var(--rarity-color) 40%, transparent),
-    0 8px 32px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rarity-color) 40%, transparent);
 }
 
 .tcg-card.full .tcg-card-header {
